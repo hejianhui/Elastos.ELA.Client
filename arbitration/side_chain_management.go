@@ -1,13 +1,19 @@
 package arbitration
 
-import "ELAClient/crypto"
+import (
+	"ELAClient/crypto"
+	"ELAClient/common"
+)
 
 type SideChain interface {
 	AccountListener
+	SpvValidation
 
 	GetKey() *crypto.PublicKey
 	GetNode() SideChainNode
 	CreateDepositTransaction(target *crypto.PublicKey, information *SpvInformation) *TransactionInfo
+
+	parseUserMainPublicKey(uint256 *common.Uint256) *crypto.PublicKey
 }
 
 type SideChainManager interface {

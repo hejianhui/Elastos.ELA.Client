@@ -9,8 +9,8 @@ type MainChain interface {
 	AccountListener
 	SpvValidation
 
-	CreateWithdrawTransaction()
+	CreateWithdrawTransaction(withdrawBank *crypto.PublicKey, target *crypto.PublicKey) *TransactionInfo
 
-	parseSideChainKey() *crypto.PublicKey
+	parseSideChainKey(uint256 *common.Uint256) *crypto.PublicKey
 	parseUserSidePublicKey(uint256 *common.Uint256) *crypto.PublicKey
 }

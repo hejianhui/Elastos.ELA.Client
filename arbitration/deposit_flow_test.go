@@ -30,15 +30,16 @@ func main() {
 	rpc.CallAndUnmarshal("sendrawtransaction", rpc.Param("Data", transactionContent))
 
 	//2. 仲裁主链
-	//MainChain.OnUTXOChanged中逻辑
+	//MainChain.OnUTXOChanged中逻辑（监听到充值申请）
 	var transactionHash *common.Uint256
 	pka := currentArbitrator.parseUserSidePublicKey(transactionHash)
-	pkS = currentArbitrator.parseSideChainKey()
+	pkS = currentArbitrator.parseSideChainKey(transactionHash)
 	spvInformation := currentArbitrator.GenerateSpvInformation(transactionHash)
-	if valid, err := currentArbitrator.IsValid(spvInformation); !valid || err!=nil {
+	if valid, err := currentArbitrator.IsValid(spvInformation); !valid || err != nil {
 		return
 	}
 
+	//3. 仲裁侧链
 	sideChain, err := currentArbitrator.GetChain(pkS)
 	tx2 := sideChain.CreateDepositTransaction(pka, spvInformation)
 	sideChain.GetNode().SendTransaction(tx2)

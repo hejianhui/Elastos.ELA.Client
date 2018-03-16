@@ -11,6 +11,10 @@ type ArbitratorSide interface {
 type Arbitrator interface {
 	ArbitratorMain
 	ArbitratorSide
+	ArbitrationNetListener
 
+	GetArbitrationNet() ArbitrationNet
+
+	IsOnDuty() bool
 	GetArbitratorGroup() ArbitratorGroup
 }
