@@ -13,7 +13,9 @@ type AccountListener interface {
 type AccountMonitor interface {
 
 	SetAccount(account *crypto.PublicKey) error
-	AddAccountListener(listener AccountListener) error
+
+	AddListener(listener AccountListener) error
+	RemoveListener(listener AccountListener) error
 
 	fireUTXOChanged() error
 }

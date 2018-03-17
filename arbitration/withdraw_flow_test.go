@@ -15,7 +15,8 @@ func main() {
 	currentArbitrator := arbitratorGroup.GetCurrentArbitrator()
 	var sideAccountMonitor AccountMonitor
 	sideAccountMonitor.SetAccount(pkDestroy)
-	sideAccountMonitor.AddAccountListener(currentArbitrator)
+	sideAccountMonitor.AddListener(currentArbitrator)
+	currentArbitrator.GetArbitrationNet().AddListener(currentArbitrator)
 
 	//1. 钱包端
 	var walleta wallet.Wallet
@@ -41,14 +42,13 @@ func main() {
 	}
 
 	//3. 仲裁主链
-	currentArbitrator.GetArbitrationNet().AddListener(currentArbitrator)
 	tx4 := currentArbitrator.CreateWithdrawTransaction(pkS, pkA)
 	tx4Bytes, err := tx4.Serialize()
 	if err != nil {
 		currentArbitrator.GetArbitrationNet().Broadcast(tx4Bytes)
 	}
 
-	//Arbitrator.OnReceived中逻辑（监听到其他仲裁人反馈）
+	//Arbitrator.OnReceived中逻辑（监听其他仲裁人反馈，收集阶段完成）
 	tx4.Deserialize(tx4Bytes)
 	var tx4SignedContent string
 	rpc.CallAndUnmarshal("sendrawtransaction", rpc.Param("Data", tx4SignedContent))

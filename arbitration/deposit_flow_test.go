@@ -15,7 +15,7 @@ func main() {
 	currentArbitrator := arbitratorGroup.GetCurrentArbitrator()
 	var mainAccountMonitor AccountMonitor
 	mainAccountMonitor.SetAccount(pkS)
-	mainAccountMonitor.AddAccountListener(currentArbitrator)
+	mainAccountMonitor.AddListener(currentArbitrator)
 
 	//1. 钱包端
 	var walletA wallet.Wallet
