@@ -27,8 +27,9 @@ const (
 
 	PUSH1 = 0x51
 
-	STANDARD = 0xAC
-	MULTISIG = 0xAE
+	STANDARD   = 0xAC
+	MULTISIG   = 0xAE
+	CROSSCHAIN = 0xAF
 )
 
 func (self TransactionType) Name() string {

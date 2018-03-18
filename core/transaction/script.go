@@ -1,15 +1,14 @@
 package transaction
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"errors"
 	"io"
 	"sort"
-	"bytes"
-	"errors"
-	"crypto/sha256"
 
 	"github.com/elastos/Elastos.ELA.Client/crypto"
 	. "github.com/elastos/Elastos.ELA.Client/common"
-
 	"github.com/golang/crypto/ripemd160"
 )
 
@@ -26,6 +25,8 @@ func ToProgramHash(code []byte) (*Uint168, error) {
 		f = append([]byte{33}, f...)
 	} else if signType == MULTISIG {
 		f = append([]byte{18}, f...)
+	} else if signType == CROSSCHAIN {
+		f = append([]byte{75}, f...)
 	}
 
 	return Uint168FromBytes(f)
@@ -68,6 +69,15 @@ func CreateMultiSignRedeemScript(M int, publicKeys []*crypto.PublicKey) ([]byte,
 	opCode = OpCode(byte(PUSH1) + byte(N) - 1)
 	buf.WriteByte(byte(opCode))
 	buf.WriteByte(MULTISIG)
+
+	return buf.Bytes(), nil
+}
+
+func CreateCrossChainRedeemScript(genesisHash []byte) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	buf.WriteByte(byte(len(genesisHash)))
+	buf.Write(genesisHash)
+	buf.WriteByte(byte(CROSSCHAIN))
 
 	return buf.Bytes(), nil
 }

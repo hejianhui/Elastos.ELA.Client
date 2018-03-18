@@ -331,6 +331,10 @@ func NewCommand() *cli.Command {
 				Usage: "the file path to specify a CSV file path with [address,amount] format as multi output content,\n" +
 					"\tor the transaction file path with the hex string content to be sign or send",
 			},
+			cli.StringFlag{
+				Name:  "key",
+				Usage: "the public key of target account",
+			},
 		},
 		Action: walletAction,
 		OnUsageError: func(c *cli.Context, err error, subCommand bool) error {
