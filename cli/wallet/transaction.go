@@ -19,49 +19,23 @@ import (
 	"github.com/urfave/cli"
 )
 
-func createCrossChainTransaction(c *cli.Context, wallet walt.Wallet, from, to string, amount, fee *Fixed64) error {
+func createCrossChainTransaction(c *cli.Context, wallet walt.Wallet, from, to string, amount, fee *Fixed64) (*tx.Transaction, error) {
 
 	targetPK := c.String("key")
 	if targetPK == "" {
-		return errors.New("use --key to specify target account pulbic key")
+		return nil, errors.New("use --key to specify target account pulbic key")
 	}
 	targetPKBytes, err := HexStringToBytes(targetPK)
 	if err != nil {
-		return errors.New("get targetPK failed: " + err.Error())
+		return nil, errors.New("get targetPK failed: " + err.Error())
 	}
 
-	_, err = wallet.CreateCrossChainTransaction(from, to, targetPKBytes, amount, fee)
+	txn, err := wallet.CreateCrossChainTransaction(from, to, targetPKBytes, amount, fee)
 	if err != nil {
-		return errors.New("create transaction failed: " + err.Error())
+		return nil, errors.New("create transaction failed: " + err.Error())
 	}
 
-	return nil
-}
-
-func getDepositAddress() (string, error) {
-
-	genesisHash := config.Config().SideChainGenesisHash
-	genesisHashByte, err := HexStringToBytes(genesisHash)
-	if err != nil {
-		return "", errors.New("invalid genesis block hash")
-	}
-
-	redeemScript, err := tx.CreateCrossChainRedeemScript(genesisHashByte)
-	if err != nil {
-		return "", errors.New("CreateCrossChainRedeemScript failed")
-	}
-
-	programHash, err := tx.ToProgramHash(redeemScript)
-	if err != nil {
-		return "", errors.New("create programhash from genesis block hash faled")
-	}
-
-	address, err := programHash.ToAddress()
-	if err != nil {
-		return "", errors.New("create address from genesis programhash faled")
-	}
-
-	return address, nil
+	return txn, nil
 }
 
 func createTransaction(c *cli.Context, wallet walt.Wallet) error {
@@ -102,42 +76,38 @@ func createTransaction(c *cli.Context, wallet walt.Wallet) error {
 	var to string
 	var txn *tx.Transaction
 	standard := c.String("to")
-	deposite := c.String("deposite")
-	withdraw := c.String("withdraw")
-
-	if deposite != "" {
-		to, err = getDepositAddress()
-		err = createCrossChainTransaction(c, wallet, from, to, amount, fee)
+	if c.Bool("deposit") {
+		to = config.Config().DepositAddress
+		txn, err = createCrossChainTransaction(c, wallet, from, to, amount, fee)
 		if err != nil {
-			return err
+			return errors.New("create transaction failed: " + err.Error())
 		}
-	} else if withdraw != "" {
+	} else if c.Bool("withdraw") {
 		to = config.Config().DestroyAddress
-		err = createCrossChainTransaction(c, wallet, from, to, amount, fee)
+		txn, err = createCrossChainTransaction(c, wallet, from, to, amount, fee)
 		if err != nil {
-			return err
+			return errors.New("create transaction failed: " + err.Error())
 		}
 	} else if standard != "" {
 		to = standard
+		lockStr := c.String("lock")
+		if lockStr == "" {
+			txn, err = wallet.CreateTransaction(from, to, amount, fee)
+			if err != nil {
+				return errors.New("create transaction failed: " + err.Error())
+			}
+		} else {
+			lock, err := strconv.ParseUint(lockStr, 10, 32)
+			if err != nil {
+				return errors.New("invalid lock height")
+			}
+			txn, err = wallet.CreateLockedTransaction(from, to, amount, fee, uint32(lock))
+			if err != nil {
+				return errors.New("create transaction failed: " + err.Error())
+			}
+		}
 	} else {
 		return errors.New("use --to or --deposit or --withdraw to specify receiver address")
-	}
-
-	lockStr := c.String("lock")
-	if lockStr == "" {
-		txn, err = wallet.CreateTransaction(from, to, amount, fee)
-		if err != nil {
-			return errors.New("create transaction failed: " + err.Error())
-		}
-	} else {
-		lock, err := strconv.ParseUint(lockStr, 10, 32)
-		if err != nil {
-			return errors.New("invalid lock height")
-		}
-		txn, err = wallet.CreateLockedTransaction(from, to, amount, fee, uint32(lock))
-		if err != nil {
-			return errors.New("create transaction failed: " + err.Error())
-		}
 	}
 
 	output(0, 0, txn)

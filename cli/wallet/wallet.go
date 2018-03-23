@@ -1,9 +1,9 @@
 package wallet
 
 import (
-	"os"
-	"fmt"
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/elastos/Elastos.ELA.Client/wallet"
 	. "github.com/elastos/Elastos.ELA.Client/common"
@@ -334,6 +334,14 @@ func NewCommand() *cli.Command {
 			cli.StringFlag{
 				Name:  "key",
 				Usage: "the public key of target account",
+			},
+			cli.BoolFlag{
+				Name:  "deposit",
+				Usage: "create deposit transaction",
+			},
+			cli.BoolFlag{
+				Name:  "withdraw",
+				Usage: "create withdraw transaction",
 			},
 		},
 		Action: walletAction,
