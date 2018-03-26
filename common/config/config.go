@@ -2,9 +2,9 @@ package config
 
 import (
 	"bytes"
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 )
 
 const (
@@ -39,7 +39,6 @@ func Params() *Config {
 	if config == nil {
 		config = &Config{
 			"localhost:20336",
-			"",
 			"",
 			"",
 		}
