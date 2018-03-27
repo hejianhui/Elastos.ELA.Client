@@ -335,11 +335,11 @@ func NewCommand() *cli.Command {
 				Name:  "key",
 				Usage: "the public key of target account",
 			},
-			cli.BoolFlag{
+			cli.StringFlag{
 				Name:  "deposit",
 				Usage: "create deposit transaction",
 			},
-			cli.BoolFlag{
+			cli.StringFlag{
 				Name:  "withdraw",
 				Usage: "create withdraw transaction",
 			},

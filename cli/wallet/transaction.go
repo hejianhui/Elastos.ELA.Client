@@ -19,21 +19,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-func createCrossChainTransaction(c *cli.Context, wallet walt.Wallet, from, to string, amount, fee *Fixed64) (*tx.Transaction, error) {
-
-	targetPK := c.String("key")
-	if targetPK == "" {
-		return nil, errors.New("use --key to specify target account pulbic key")
-	}
-
-	txn, err := wallet.CreateCrossChainTransaction(from, to, targetPK, amount, fee)
-	if err != nil {
-		return nil, errors.New("create transaction failed: " + err.Error())
-	}
-
-	return txn, nil
-}
-
 func createTransaction(c *cli.Context, wallet walt.Wallet) error {
 
 	feeStr := c.String("fee")
@@ -72,15 +57,17 @@ func createTransaction(c *cli.Context, wallet walt.Wallet) error {
 	var to string
 	var txn *tx.Transaction
 	standard := c.String("to")
-	if c.Bool("deposit") {
+	deposit := c.String("deposit")
+	withdraw := c.String("withdraw")
+	if deposit != "" {
 		to = config.Config().DepositAddress
-		txn, err = createCrossChainTransaction(c, wallet, from, to, amount, fee)
+		txn, err = wallet.CreateCrossChainTransaction(from, to, deposit, amount, fee)
 		if err != nil {
 			return errors.New("create transaction failed: " + err.Error())
 		}
-	} else if c.Bool("withdraw") {
+	} else if withdraw != "" {
 		to = config.Config().DestroyAddress
-		txn, err = createCrossChainTransaction(c, wallet, from, to, amount, fee)
+		txn, err = wallet.CreateCrossChainTransaction(from, to, withdraw, amount, fee)
 		if err != nil {
 			return errors.New("create transaction failed: " + err.Error())
 		}

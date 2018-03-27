@@ -25,9 +25,9 @@ type Output struct {
 }
 
 type CrossChainOutput struct {
-	Address   string
-	Amount    *Fixed64
-	PublicKey string
+	Address           string
+	Amount            *Fixed64
+	CrossChainAddress string
 }
 
 var wallet Wallet // Single instance of wallet
@@ -45,7 +45,7 @@ type Wallet interface {
 	CreateLockedTransaction(fromAddress, toAddress string, amount, fee *Fixed64, lockedUntil uint32) (*tx.Transaction, error)
 	CreateMultiOutputTransaction(fromAddress string, fee *Fixed64, output ...*Output) (*tx.Transaction, error)
 	CreateLockedMultiOutputTransaction(fromAddress string, fee *Fixed64, lockedUntil uint32, output ...*Output) (*tx.Transaction, error)
-	CreateCrossChainTransaction(fromAddress, toAddress string, toPublicKey string, amount, fee *Fixed64) (*tx.Transaction, error)
+	CreateCrossChainTransaction(fromAddress, toAddress string, crossChainAddress string, amount, fee *Fixed64) (*tx.Transaction, error)
 
 	Sign(name string, password []byte, transaction *tx.Transaction) (*tx.Transaction, error)
 
@@ -156,8 +156,8 @@ func (wallet *WalletImpl) CreateLockedMultiOutputTransaction(fromAddress string,
 	return wallet.createTransaction(fromAddress, fee, lockedUntil, outputs...)
 }
 
-func (wallet *WalletImpl) CreateCrossChainTransaction(fromAddress, toAddress string, toPublicKey string, amount, fee *Fixed64) (*tx.Transaction, error) {
-	return wallet.createCrossChainTransaction(fromAddress, fee, uint32(0), &CrossChainOutput{toAddress, amount, toPublicKey})
+func (wallet *WalletImpl) CreateCrossChainTransaction(fromAddress, toAddress string, crossChainAddress string, amount, fee *Fixed64) (*tx.Transaction, error) {
+	return wallet.createCrossChainTransaction(fromAddress, fee, uint32(0), &CrossChainOutput{toAddress, amount, crossChainAddress})
 }
 
 func (wallet *WalletImpl) createTransaction(fromAddress string, fee *Fixed64, lockedUntil uint32, outputs ...*Output) (*tx.Transaction, error) {
@@ -257,7 +257,7 @@ func (wallet *WalletImpl) createCrossChainTransaction(fromAddress string, fee *F
 	totalOutputAmount += *fee          // Add transaction fee
 
 	txPayload := &payload.TransferCrossChainAsset{}
-	txPayload.PublicKeys = make(map[string]uint64)
+	txPayload.CrossChainAddress = make(map[string]uint64)
 	for index, output := range outputs {
 		receiver, err := Uint168FromAddress(output.Address)
 		if err != nil {
@@ -272,7 +272,7 @@ func (wallet *WalletImpl) createCrossChainTransaction(fromAddress string, fee *F
 		totalOutputAmount += *output.Amount
 		txOutputs = append(txOutputs, txOutput)
 
-		txPayload.PublicKeys[output.PublicKey] = uint64(index)
+		txPayload.CrossChainAddress[output.CrossChainAddress] = uint64(index)
 	}
 	// Get spender's UTXOs
 	UTXOs, err := wallet.GetAddressUTXOs(spender)
