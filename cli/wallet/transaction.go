@@ -25,12 +25,8 @@ func createCrossChainTransaction(c *cli.Context, wallet walt.Wallet, from, to st
 	if targetPK == "" {
 		return nil, errors.New("use --key to specify target account pulbic key")
 	}
-	targetPKBytes, err := HexStringToBytes(targetPK)
-	if err != nil {
-		return nil, errors.New("get targetPK failed: " + err.Error())
-	}
 
-	txn, err := wallet.CreateCrossChainTransaction(from, to, targetPKBytes, amount, fee)
+	txn, err := wallet.CreateCrossChainTransaction(from, to, targetPK, amount, fee)
 	if err != nil {
 		return nil, errors.New("create transaction failed: " + err.Error())
 	}

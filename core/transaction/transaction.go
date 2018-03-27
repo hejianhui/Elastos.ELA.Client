@@ -1,11 +1,11 @@
 package transaction
 
 import (
-	"io"
-	"fmt"
 	"bytes"
-	"errors"
 	"crypto/sha256"
+	"errors"
+	"fmt"
+	"io"
 
 	"github.com/elastos/Elastos.ELA.Client/crypto"
 	. "github.com/elastos/Elastos.ELA.Client/common"
@@ -19,11 +19,13 @@ import (
 type TransactionType byte
 
 const (
-	CoinBase      TransactionType = 0x00
-	RegisterAsset TransactionType = 0x01
-	TransferAsset TransactionType = 0x02
-	Record        TransactionType = 0x03
-	Deploy        TransactionType = 0x04
+	CoinBase                TransactionType = 0x00
+	RegisterAsset           TransactionType = 0x01
+	TransferAsset           TransactionType = 0x02
+	Record                  TransactionType = 0x03
+	Deploy                  TransactionType = 0x04
+	IssueToken              TransactionType = 0x05
+	TransferCrossChainAsset TransactionType = 0x06
 
 	PUSH1 = 0x51
 
@@ -44,6 +46,10 @@ func (self TransactionType) Name() string {
 		return "Record"
 	case Deploy:
 		return "Deploy"
+	case IssueToken:
+		return "IssueToken"
+	case TransferCrossChainAsset:
+		return "TransferCrossChainAsset"
 	default:
 		return "Unknown"
 	}
@@ -401,7 +407,7 @@ func (tx *Transaction) GetTransactionType() (byte, error) {
 	return code[len(code)-1], nil
 }
 
-func (tx *Transaction) getM() (int) {
+func (tx *Transaction) getM() int {
 	return int(tx.Programs[0].Code[0] - PUSH1 + 1)
 }
 
@@ -452,7 +458,7 @@ func (tx *Transaction) AppendSignature(signerIndex int, signature []byte) error 
 		tx.SerializeUnsigned(buf)
 		for i := 0; i < len(param); i += SignatureScriptLength {
 			// Remove length byte
-			sign := param[i:i+SignatureScriptLength][1:]
+			sign := param[i : i+SignatureScriptLength][1:]
 			publicKey := publicKeys[signerIndex][1:]
 			pubKey, err := crypto.DecodePoint(publicKey)
 			if err != nil {
