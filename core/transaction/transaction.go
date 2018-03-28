@@ -234,6 +234,8 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 	case TransferAsset:
 		tx.Payload = new(payload.TransferAsset)
 	case Deploy:
+	case TransferCrossChainAsset:
+		tx.Payload = new(payload.TransferCrossChainAsset)
 	default:
 		return errors.New("[Transaction], invalid transaction type.")
 	}

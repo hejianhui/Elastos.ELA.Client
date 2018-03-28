@@ -39,9 +39,6 @@ func (a *TransferCrossChainAsset) Serialize(w io.Writer, version byte) error {
 }
 
 func (a *TransferCrossChainAsset) Deserialize(r io.Reader, version byte) error {
-	if a.CrossChainAddress == nil {
-		return errors.New("Invalid public key map")
-	}
 
 	length, err := serialization.ReadVarUint(r, 0)
 	if err != nil {
