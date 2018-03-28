@@ -235,7 +235,7 @@ func (wallet *WalletImpl) createTransaction(fromAddress string, fee *Fixed64, lo
 		return nil, errors.New("[Wallet], Get spenders account info failed")
 	}
 
-	return wallet.newTransaction(account.RedeemScript, txInputs, txOutputs), nil
+	return wallet.newTransaction(account.RedeemScript, txInputs, txOutputs, tx.TransferAsset), nil
 }
 
 func (wallet *WalletImpl) createCrossChainTransaction(fromAddress string, fee *Fixed64, lockedUntil uint32, outputs ...*CrossChainOutput) (*tx.Transaction, error) {
@@ -312,7 +312,7 @@ func (wallet *WalletImpl) createCrossChainTransaction(fromAddress string, fee *F
 		return nil, errors.New("[Wallet], Get spenders account info failed")
 	}
 
-	txn := wallet.newTransaction(account.RedeemScript, txInputs, txOutputs)
+	txn := wallet.newTransaction(account.RedeemScript, txInputs, txOutputs, tx.TransferCrossChainAsset)
 	txn.Payload = txPayload
 
 	return txn, nil
@@ -445,7 +445,7 @@ func (wallet *WalletImpl) removeLockedUTXOs(utxos []*AddressUTXO) []*AddressUTXO
 	return availableUTXOs
 }
 
-func (wallet *WalletImpl) newTransaction(redeemScript []byte, inputs []*tx.UTXOTxInput, outputs []*tx.TxOutput) *tx.Transaction {
+func (wallet *WalletImpl) newTransaction(redeemScript []byte, inputs []*tx.UTXOTxInput, outputs []*tx.TxOutput, txType tx.TransactionType) *tx.Transaction {
 	// Create payload
 	txPayload := &payload.TransferAsset{}
 	// Create attributes
@@ -456,7 +456,7 @@ func (wallet *WalletImpl) newTransaction(redeemScript []byte, inputs []*tx.UTXOT
 	var program = &pg.Program{redeemScript, nil}
 	// Create transaction
 	return &tx.Transaction{
-		TxType:        tx.TransferCrossChainAsset,
+		TxType:        txType,
 		Payload:       txPayload,
 		Attributes:    attributes,
 		UTXOInputs:    inputs,
