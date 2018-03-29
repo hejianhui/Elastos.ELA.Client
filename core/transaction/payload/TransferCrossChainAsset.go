@@ -7,8 +7,8 @@ import (
 )
 
 type TransferCrossChainAsset struct {
-	//string: targetAddress; uint64: output index
-	CrossChainAddress map[string]uint64
+	// string: address; uint64: output index
+	AddressesMap map[string]uint64
 }
 
 func (a *TransferCrossChainAsset) Data(version byte) []byte {
@@ -17,21 +17,21 @@ func (a *TransferCrossChainAsset) Data(version byte) []byte {
 }
 
 func (a *TransferCrossChainAsset) Serialize(w io.Writer, version byte) error {
-	if a.CrossChainAddress == nil {
-		return errors.New("Invalid publickey map")
+	if a.AddressesMap == nil {
+		return errors.New("Invalid address map")
 	}
 
-	if err := serialization.WriteVarUint(w, uint64(len(a.CrossChainAddress))); err != nil {
-		return errors.New("publicKey map's length serialize failed")
+	if err := serialization.WriteVarUint(w, uint64(len(a.AddressesMap))); err != nil {
+		return errors.New("address map's length serialize failed")
 	}
 
-	for k, v := range a.CrossChainAddress {
+	for k, v := range a.AddressesMap {
 		if err := serialization.WriteVarString(w, k); err != nil {
-			return errors.New("publicKey map's key serialize failed")
+			return errors.New("address map's key serialize failed")
 		}
 
 		if err := serialization.WriteVarUint(w, v); err != nil {
-			return errors.New("publicKey map's value serialize failed")
+			return errors.New("address map's index serialize failed")
 		}
 	}
 
@@ -39,26 +39,25 @@ func (a *TransferCrossChainAsset) Serialize(w io.Writer, version byte) error {
 }
 
 func (a *TransferCrossChainAsset) Deserialize(r io.Reader, version byte) error {
-
 	length, err := serialization.ReadVarUint(r, 0)
 	if err != nil {
-		return errors.New("publicKey map's length deserialize failed")
+		return errors.New("address map's length deserialize failed")
 	}
 
-	a.CrossChainAddress = nil
-	a.CrossChainAddress = make(map[string]uint64)
+	a.AddressesMap = nil
+	a.AddressesMap = make(map[string]uint64)
 	for i := uint64(0); i < length; i++ {
 		k, err := serialization.ReadVarString(r)
 		if err != nil {
-			return errors.New("publicKey map's key deserialize failed")
+			return errors.New("address map's key deserialize failed")
 		}
 
-		v, err := serialization.ReadVarUint(r, 0)
+		index, err := serialization.ReadVarUint(r, 0)
 		if err != nil {
-			return errors.New("publicKey map's value deserialize failed")
+			return errors.New("address map's index deserialize failed")
 		}
 
-		a.CrossChainAddress[k] = v
+		a.AddressesMap[k] = index
 	}
 
 	return nil
