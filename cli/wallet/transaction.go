@@ -60,13 +60,13 @@ func createTransaction(c *cli.Context, wallet walt.Wallet) error {
 	deposit := c.String("deposit")
 	withdraw := c.String("withdraw")
 	if deposit != "" {
-		to = config.Config().DepositAddress
+		to = config.Params().DepositAddress
 		txn, err = wallet.CreateCrossChainTransaction(from, to, deposit, amount, fee)
 		if err != nil {
 			return errors.New("create transaction failed: " + err.Error())
 		}
 	} else if withdraw != "" {
-		to = config.Config().DestroyAddress
+		to = config.Params().DestroyAddress
 		txn, err = wallet.CreateCrossChainTransaction(from, to, withdraw, amount, fee)
 		if err != nil {
 			return errors.New("create transaction failed: " + err.Error())

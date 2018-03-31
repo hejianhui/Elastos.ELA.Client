@@ -10,3 +10,4 @@ import:
 - package: github.com/urfave/cli
 ignore:
   - golang.org/x/sys/unix
+  - golang.org/x/sys/windows

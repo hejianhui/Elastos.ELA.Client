@@ -41,6 +41,7 @@ func Params() *Config {
 			"localhost:20336",
 			"",
 			"",
+			"",
 		}
 		err := config.readConfigFile()
 		if err != nil {

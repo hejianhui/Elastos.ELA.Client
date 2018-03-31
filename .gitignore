@@ -21,3 +21,4 @@ deps/
 *.txn
 *.lock
 *.json
+.*.swp

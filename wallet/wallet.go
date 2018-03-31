@@ -285,7 +285,12 @@ func (wallet *WalletImpl) createCrossChainTransaction(fromAddress string, fee *F
 	// Create transaction inputs
 	var txInputs []*tx.UTXOTxInput // The inputs in transaction
 	for _, utxo := range availableUTXOs {
-		txInputs = append(txInputs, utxo.Input)
+		input := &tx.UTXOTxInput{
+			ReferTxID:          utxo.Op.TxID,
+			ReferTxOutputIndex: utxo.Op.Index,
+			Sequence:           utxo.LockTime,
+		}
+		txInputs = append(txInputs, input)
 		if *utxo.Amount < totalOutputAmount {
 			totalOutputAmount -= *utxo.Amount
 		} else if *utxo.Amount == totalOutputAmount {

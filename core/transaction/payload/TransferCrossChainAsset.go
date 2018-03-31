@@ -1,9 +1,10 @@
 package payload
 
 import (
-	"ELAClient/common/serialization"
 	"errors"
 	"io"
+
+	"github.com/elastos/Elastos.ELA.Client/common/serialization"
 )
 
 type TransferCrossChainAsset struct {
