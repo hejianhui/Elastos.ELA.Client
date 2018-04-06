@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"database/sql"
 
-	. "github.com/elastos/Elastos.ELA.Client/common"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
 	"github.com/elastos/Elastos.ELA.Client/common/log"
 	tx "github.com/elastos/Elastos.ELA.Client/core/transaction"
 

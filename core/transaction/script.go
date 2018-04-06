@@ -2,35 +2,17 @@ package transaction
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"errors"
-	"io"
 	"sort"
 
-	"github.com/elastos/Elastos.ELA.Client/crypto"
-	. "github.com/elastos/Elastos.ELA.Client/common"
-	"github.com/golang/crypto/ripemd160"
+	. "github.com/elastos/Elastos.ELA.Client/crypto"
+	. "github.com/elastos/Elastos.ELA.Utility/core/signature"
+	"github.com/elastos/Elastos.ELA.Utility/crypto"
 )
 
 type OpCode byte
 
-func ToProgramHash(code []byte) (*Uint168, error) {
-	temp := sha256.Sum256(code)
-	md := ripemd160.New()
-	io.WriteString(md, string(temp[:]))
-	f := md.Sum(nil)
-
-	signType := code[len(code)-1]
-	if signType == STANDARD {
-		f = append([]byte{33}, f...)
-	} else if signType == MULTISIG {
-		f = append([]byte{18}, f...)
-	}
-
-	return Uint168FromBytes(f)
-}
-
-func CreateStandardRedeemScript(publicKey *crypto.PublicKey) ([]byte, error) {
+func CreateStandardRedeemScript(publicKey *crypto.PubKey) ([]byte, error) {
 	content, err := publicKey.EncodePoint(true)
 	if err != nil {
 		return nil, errors.New("create standard redeem script, encode public key failed")
@@ -43,14 +25,14 @@ func CreateStandardRedeemScript(publicKey *crypto.PublicKey) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func CreateMultiSignRedeemScript(M int, publicKeys []*crypto.PublicKey) ([]byte, error) {
+func CreateMultiSignRedeemScript(M int, publicKeys []*crypto.PubKey) ([]byte, error) {
 	// Write M
 	opCode := OpCode(byte(PUSH1) + byte(M) - 1)
 	buf := new(bytes.Buffer)
 	buf.WriteByte(byte(opCode))
 
 	//sort pubkey
-	sort.Sort(crypto.PubKeySlice(publicKeys))
+	sort.Sort(PubKeySlice(publicKeys))
 
 	// Write public keys
 	for _, pubkey := range publicKeys {

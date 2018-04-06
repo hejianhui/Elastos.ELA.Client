@@ -2,9 +2,11 @@ package wallet
 
 import (
 	"fmt"
-	. "github.com/elastos/Elastos.ELA.Client/rpc"
-	. "github.com/elastos/Elastos.ELA.Client/common"
+
 	tx "github.com/elastos/Elastos.ELA.Client/core/transaction"
+	. "github.com/elastos/Elastos.ELA.Client/rpc"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
+	uti_tx "github.com/elastos/Elastos.ELA.Utility/core/transaction"
 )
 
 type DataSync interface {
@@ -89,7 +91,7 @@ func (sync *DataSyncImpl) processBlock(block *BlockInfo) {
 				txHashBytes, _ := HexStringToBytesReverse(txn.Hash)
 				referTxHash, _ := Uint256FromBytes(txHashBytes)
 				lockTime := output.OutputLock
-				if txn.TxType == tx.CoinBase {
+				if txn.TxType == uti_tx.CoinBase {
 					lockTime = block.BlockData.Height + 100
 				}
 				amount, _ := StringToFixed64(output.Value)

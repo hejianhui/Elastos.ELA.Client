@@ -1,15 +1,15 @@
 package wallet
 
 import (
-	"os"
-	"fmt"
 	"bufio"
 	"errors"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
-	. "github.com/elastos/Elastos.ELA.Client/common"
 	walt "github.com/elastos/Elastos.ELA.Client/wallet"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
 )
 
 func selectAddress(wallet walt.Wallet) (string, error) {

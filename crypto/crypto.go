@@ -1,44 +1,26 @@
 package crypto
 
 import (
-	"fmt"
-	"errors"
-	"math/big"
-	"crypto/rand"
 	"crypto/ecdsa"
+	"crypto/rand"
 	"crypto/sha256"
-	"crypto/elliptic"
-)
+	"errors"
+	"fmt"
+	"math/big"
 
-const (
-	SIGNRLEN     = 32
-	SIGNATURELEN = 64
+	. "github.com/elastos/Elastos.ELA.Utility/crypto"
 )
-
-type CryptoAlgSet struct {
-	EccParams elliptic.CurveParams
-	Curve     elliptic.Curve
-}
 
 var algSet CryptoAlgSet
 
-type PublicKey struct {
-	X, Y *big.Int
-}
-
-func init() {
-	algSet.Curve = elliptic.P256()
-	algSet.EccParams = *(algSet.Curve.Params())
-}
-
-func GenKeyPair() ([]byte, *PublicKey, error) {
+func GenKeyPair() ([]byte, *PubKey, error) {
 
 	privateKey, err := ecdsa.GenerateKey(algSet.Curve, rand.Reader)
 	if err != nil {
 		return nil, nil, errors.New("Generate key pair error")
 	}
 
-	publicKey := new(PublicKey)
+	publicKey := new(PubKey)
 	publicKey.X = new(big.Int).Set(privateKey.PublicKey.X)
 	publicKey.Y = new(big.Int).Set(privateKey.PublicKey.Y)
 
@@ -72,33 +54,7 @@ func Sign(priKey []byte, data []byte) ([]byte, error) {
 	return signature, nil
 }
 
-func Verify(publicKey PublicKey, data []byte, signature []byte) error {
-	len := len(signature)
-	if len != SIGNATURELEN {
-		fmt.Printf("Unknown signature length %d\n", len)
-		return errors.New("Unknown signature length")
-	}
-
-	r := new(big.Int).SetBytes(signature[:len/2])
-	s := new(big.Int).SetBytes(signature[len/2:])
-
-	digest := sha256.Sum256(data)
-
-	pub := new(ecdsa.PublicKey)
-	pub.Curve = algSet.Curve
-
-	pub.X = new(big.Int).Set(publicKey.X)
-	pub.Y = new(big.Int).Set(publicKey.Y)
-
-	if ecdsa.Verify(pub, digest[:], r, s) {
-		return nil
-	} else {
-		return errors.New("[Validation], Verify failed.")
-	}
-
-}
-
-type PubKeySlice []*PublicKey
+type PubKeySlice []*PubKey
 
 func (p PubKeySlice) Len() int { return len(p) }
 func (p PubKeySlice) Less(i, j int) bool {
@@ -112,7 +68,7 @@ func (p PubKeySlice) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-func Equal(e1 *PublicKey, e2 *PublicKey) bool {
+func Equal(e1 *PubKey, e2 *PubKey) bool {
 	r := e1.X.Cmp(e2.X)
 	if r != 0 {
 		return false

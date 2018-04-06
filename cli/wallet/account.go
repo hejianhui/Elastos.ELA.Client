@@ -7,9 +7,9 @@ import (
 	"strings"
 	"io/ioutil"
 
-	"github.com/elastos/Elastos.ELA.Client/crypto"
+	"github.com/elastos/Elastos.ELA.Utility/crypto"
 	. "github.com/elastos/Elastos.ELA.Client/wallet"
-	. "github.com/elastos/Elastos.ELA.Client/common"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
 
 	"github.com/urfave/cli"
 )
@@ -71,7 +71,7 @@ func addMultiSignAccount(context *cli.Context, wallet Wallet, content string) er
 	return nil
 }
 
-func getPublicKey(content string) (*crypto.PublicKey, error) {
+func getPublicKey(content string) (*crypto.PubKey, error) {
 	// Content can not be empty
 	if content == "" {
 		return nil, errors.New("content should be the public key file path or public key string")
@@ -104,7 +104,7 @@ func getPublicKey(content string) (*crypto.PublicKey, error) {
 	return publicKey, nil
 }
 
-func getPublicKeys(content string) ([]*crypto.PublicKey, error) {
+func getPublicKeys(content string) ([]*crypto.PubKey, error) {
 	// Content can not be empty
 	if content == "" {
 		return nil, errors.New("content should be the public key[s] file path or public key strings separated by comma")
@@ -138,7 +138,7 @@ func getPublicKeys(content string) ([]*crypto.PublicKey, error) {
 	}
 
 	// Decode public keys from public key strings
-	var publicKeys []*crypto.PublicKey
+	var publicKeys []*crypto.PubKey
 	for _, v := range publicKeyStrings {
 		keyBytes, err := HexStringToBytes(strings.TrimSpace(v))
 		if err != nil {

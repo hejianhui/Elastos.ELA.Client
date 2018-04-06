@@ -1,15 +1,18 @@
 package wallet
 
 import (
-	"sync"
 	"bytes"
-	"errors"
 	"crypto/rand"
 	"crypto/sha256"
+	"errors"
+	"sync"
 
-	"github.com/elastos/Elastos.ELA.Client/crypto"
-	. "github.com/elastos/Elastos.ELA.Client/common"
 	tx "github.com/elastos/Elastos.ELA.Client/core/transaction"
+	"github.com/elastos/Elastos.ELA.Client/crypto"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
+	. "github.com/elastos/Elastos.ELA.Utility/core/signature"
+	uti_tx "github.com/elastos/Elastos.ELA.Utility/core/transaction"
+	uti_crypto "github.com/elastos/Elastos.ELA.Utility/crypto"
 )
 
 /*
@@ -22,11 +25,11 @@ const (
 type Keystore interface {
 	ChangePassword(oldPassword, newPassword []byte) error
 
-	GetPublicKey() *crypto.PublicKey
+	GetPublicKey() *uti_crypto.PubKey
 	GetRedeemScript() []byte
 	GetProgramHash() *Uint168
 
-	Sign(password []byte, txn *tx.Transaction) ([]byte, error)
+	Sign(password []byte, txn *uti_tx.Transaction) ([]byte, error)
 }
 
 type KeystoreImpl struct {
@@ -34,7 +37,7 @@ type KeystoreImpl struct {
 
 	*KeystoreFile
 
-	publicKey    *crypto.PublicKey
+	publicKey    *uti_crypto.PubKey
 	redeemScript []byte
 	programHash  *Uint168
 }
@@ -131,7 +134,7 @@ func OpenKeystore(name string, password []byte) (Keystore, error) {
 	return keystore, nil
 }
 
-func (store *KeystoreImpl) init(privateKey []byte, publicKey *crypto.PublicKey) error {
+func (store *KeystoreImpl) init(privateKey []byte, publicKey *uti_crypto.PubKey) error {
 	defer ClearBytes(privateKey, len(privateKey))
 
 	// Set public key
@@ -144,7 +147,7 @@ func (store *KeystoreImpl) init(privateKey []byte, publicKey *crypto.PublicKey) 
 	// Set redeem script
 	store.redeemScript = signatureRedeemScript
 
-	programHash, err := tx.ToProgramHash(signatureRedeemScript)
+	programHash, err := ToProgramHash(signatureRedeemScript)
 	if err != nil {
 		return err
 	}
@@ -229,7 +232,7 @@ func (store *KeystoreImpl) ChangePassword(oldPassword, newPassword []byte) error
 	return nil
 }
 
-func (store *KeystoreImpl) GetPublicKey() *crypto.PublicKey {
+func (store *KeystoreImpl) GetPublicKey() *uti_crypto.PubKey {
 	return store.publicKey
 }
 
@@ -241,7 +244,7 @@ func (store *KeystoreImpl) GetProgramHash() *Uint168 {
 	return store.programHash
 }
 
-func (store *KeystoreImpl) Sign(password []byte, txn *tx.Transaction) ([]byte, error) {
+func (store *KeystoreImpl) Sign(password []byte, txn *uti_tx.Transaction) ([]byte, error) {
 	privateKey, _, err := store.decryptPrivateKey(crypto.ToAesKey(password))
 	if err != nil {
 		return nil, err
@@ -290,7 +293,7 @@ func (store *KeystoreImpl) decryptMasterKey(passwordKey []byte) (masterKey []byt
 	return masterKey, nil
 }
 
-func (store *KeystoreImpl) encryptPrivateKey(masterKey, passwordKey, privateKey []byte, publicKey *crypto.PublicKey) ([]byte, error) {
+func (store *KeystoreImpl) encryptPrivateKey(masterKey, passwordKey, privateKey []byte, publicKey *uti_crypto.PubKey) ([]byte, error) {
 	decryptedPrivateKey := make([]byte, 96)
 	defer ClearBytes(decryptedPrivateKey, 96)
 
@@ -317,7 +320,7 @@ func (store *KeystoreImpl) encryptPrivateKey(masterKey, passwordKey, privateKey 
 	return encryptedPrivateKey, nil
 }
 
-func (store *KeystoreImpl) decryptPrivateKey(passwordKey []byte) ([]byte, *crypto.PublicKey, error) {
+func (store *KeystoreImpl) decryptPrivateKey(passwordKey []byte) ([]byte, *uti_crypto.PubKey, error) {
 	privateKeyEncrypted, err := store.GetPrivetKeyEncrypted()
 	if err != nil {
 		return nil, nil, err

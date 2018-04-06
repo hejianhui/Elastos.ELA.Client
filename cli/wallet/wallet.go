@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/elastos/Elastos.ELA.Client/wallet"
-	. "github.com/elastos/Elastos.ELA.Client/common"
 	"github.com/elastos/Elastos.ELA.Client/common/log"
 	"github.com/elastos/Elastos.ELA.Client/common/password"
+	"github.com/elastos/Elastos.ELA.Client/wallet"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
 
 	"github.com/urfave/cli"
 )
