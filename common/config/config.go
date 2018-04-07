@@ -14,10 +14,8 @@ const (
 var config *Config // The single instance of config
 
 type Config struct {
-	Host                 string `json:"Host"`
-	SideChainGenesisHash string `json:"SideChainGenesisHash"`
-	DepositAddress       string `json:"DepositAddress"`
-	DestroyAddress       string `json:"DestroyAddress"`
+	Host           string `json:"Host"`
+	DepositAddress string `json:"DepositAddress"`
 }
 
 func (config *Config) readConfigFile() error {
@@ -39,8 +37,6 @@ func Params() *Config {
 	if config == nil {
 		config = &Config{
 			"localhost:20336",
-			"",
-			"",
 			"",
 		}
 		err := config.readConfigFile()
