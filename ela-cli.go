@@ -6,12 +6,12 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/elastos/Elastos.ELA.Client.Core/cli/info"
-	cliLog "github.com/elastos/Elastos.ELA.Client.Core/cli/log"
-	"github.com/elastos/Elastos.ELA.Client.Core/cli/mine"
-	"github.com/elastos/Elastos.ELA.Client.Core/cli/wallet"
-	"github.com/elastos/Elastos.ELA.Client.Core/common/log"
+	"github.com/elastos/Elastos.ELA.Client/cli/info"
+	cliLog "github.com/elastos/Elastos.ELA.Client/cli/log"
+	"github.com/elastos/Elastos.ELA.Client/cli/mine"
+	"github.com/elastos/Elastos.ELA.Client/cli/wallet"
 	_ "github.com/elastos/Elastos.ELA.Client/cli/wallet"
+	"github.com/elastos/Elastos.ELA.Client/common/log"
 	_ "github.com/elastos/Elastos.ELA.Client/rpc"
 )
 

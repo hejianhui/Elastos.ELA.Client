@@ -2,36 +2,57 @@ package wallet
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/urfave/cli"
 
-	core_wallect "github.com/elastos/Elastos.ELA.Client.Core/cli/wallet"
-	walt "github.com/elastos/Elastos.ELA.Client.Core/wallet"
 	"github.com/elastos/Elastos.ELA.Client/common/config"
+	walt "github.com/elastos/Elastos.ELA.Client/wallet"
+	. "github.com/elastos/Elastos.ELA.Utility/common"
 	tx "github.com/elastos/Elastos.ELA.Utility/core/transaction"
 )
 
-type SingleTransactionCreatorMainImpl struct {
-	innerCreator *core_wallect.SingleTransactionCreatorImpl
+var SingleTransactionCreatorSingleton SingleTransactionCreator
+
+type SingleTransactionCreator interface {
+	Create(c *cli.Context, param *SingleTransactionParameter, wallet walt.Wallet) (*tx.Transaction, error)
 }
 
-func (impl *SingleTransactionCreatorMainImpl) Create(c *cli.Context,
-	param *core_wallect.SingleTransactionParameter, wallet walt.Wallet) (*tx.Transaction, error) {
-	trans, err := impl.innerCreator.Create(c, param, wallet)
-	if trans != nil && err == nil {
-		return trans, err
-	}
+type SingleTransactionParameter struct {
+	From   string
+	Amount *Fixed64
+	Fee    *Fixed64
+}
 
-	deposit := c.String("deposit")
-	if deposit != "" {
-		to := config.Params().DepositAddress
-		return wallet.CreateCrossChainTransaction(param.From, to, deposit, param.Amount, param.Fee)
-	}
+type SingleTransactionCreatorImpl struct {
+}
 
-	return nil, errors.New("use --to or --deposit or --withdraw to specify receiver address")
+func (impl *SingleTransactionCreatorImpl) Create(c *cli.Context, param *SingleTransactionParameter, wallet walt.Wallet) (*tx.Transaction, error) {
+	var to string
+	standard := c.String("to")
+	if standard != "" {
+		to = standard
+		lockStr := c.String("lock")
+		if lockStr == "" {
+			return wallet.CreateTransaction(param.From, to, param.Amount, param.Fee)
+		} else {
+			lock, err := strconv.ParseUint(lockStr, 10, 32)
+			if err != nil {
+				return nil, errors.New("invalid lock height")
+			}
+			return wallet.CreateLockedTransaction(param.From, to, param.Amount, param.Fee, uint32(lock))
+		}
+	} else {
+		deposit := c.String("deposit")
+		if deposit != "" {
+			to := config.Params().DepositAddress
+			return wallet.CreateCrossChainTransaction(param.From, to, deposit, param.Amount, param.Fee)
+		}
+
+		return nil, errors.New("use --to or --deposit or --withdraw to specify receiver address")
+	}
 }
 
 func init() {
-	core_wallect.SingleTransactionCreatorSingleton = &SingleTransactionCreatorMainImpl{
-		&core_wallect.SingleTransactionCreatorImpl{}}
+	SingleTransactionCreatorSingleton = &SingleTransactionCreatorImpl{}
 }
